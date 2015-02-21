@@ -1,3 +1,7 @@
+import requests
+import sys
+import json
+
 class _const:
     class ConstError(TypeError): pass
     def __setattr__(self,name,value):

@@ -1,8 +1,9 @@
 import requests
 import sys
 import json
-
 import const
+import os
+
 from server import *
 
 
@@ -14,14 +15,10 @@ def getTokenFromFile():
 			d[key] = val
 		return d
 
-def main():
 
-	const.token = getTokenFromFile()['token'].replace('"', '')
-	const.api_base_url = "https://api.cloud.online.net"
-	
-	headers = {"X-Auth-Token" : const.token, "Content-Type" : "application/json"}
-
-	r = requests.get(const.api_base_url + "/servers", headers = headers)
+def getServers():
+	r = requests.get(const.api_base_url + "/servers", headers = const.headers)
+	print r.url
 
 	jsonArray = r.text
 
@@ -33,10 +30,30 @@ def main():
 		server = as_server(jsonServer)
 		servers[server.name] = server
 
-	params = {'action': 'poweroff'}
-	r = requests.post(const.api_base_url + "/servers/" + servers[servers.keys()[0]].id +  "/action", data = json.dumps(params), headers = headers)
+	return servers
 
-	print r.text
+def notify(title, subtitle, message):
+    t = '-title {!r}'.format(title)
+    s = '-subtitle {!r}'.format(subtitle)
+    m = '-message {!r}'.format(message)
+    os.system('terminal-notifier {}'.format(' '.join([m, t, s])))
+
+
+
+def main():
+
+	const.token = getTokenFromFile()['token'].replace('"', '')
+	const.api_base_url = "https://api.cloud.online.net"
+	
+	const.headers = {"X-Auth-Token" : const.token, "Content-Type" : "application/json"}
+
+	servers = getServers()
+
+	# servers[servers.keys()[0]].powerOn()
+	# servers["TestServer"].powerOn()
+
+	# servers[servers.keys()[0]].powerOff()
+	# servers["TestServer"].powerOff()
 
 if __name__ == "__main__":
 	main()
